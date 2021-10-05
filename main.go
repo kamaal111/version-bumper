@@ -4,11 +4,44 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
+	"path/filepath"
+	"strconv"
 	"strings"
+	"time"
 )
 
 func main() {
-	xCodeProjBytes, err := ioutil.ReadFile("../../Password-Generator.xcodeproj/project.pbxproj")
+	start := time.Now()
+
+	buildNumberString := os.Getenv("BUILD_NUMBER")
+	if buildNumberString == "" {
+		log.Fatalln("now build number provided")
+	}
+
+	buildNumber, err := strconv.Atoi(buildNumberString)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	projectFiles, err := ioutil.ReadDir(".")
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	var foundProjectFile string
+	for _, projectFile := range projectFiles {
+		if strings.Contains(projectFile.Name(), "xcodeproj") && projectFile.IsDir() {
+			foundProjectFile = filepath.Join(".", projectFile.Name(), "project.pbxproj")
+			break
+		}
+	}
+
+	if foundProjectFile == "" {
+		log.Fatalln("could not find project in directory")
+	}
+
+	xCodeProjBytes, err := ioutil.ReadFile(foundProjectFile)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -23,7 +56,7 @@ func main() {
 			for i := 0; i < amountOfTabs; i++ {
 				tabsToAdd += oneTab
 			}
-			newString := fmt.Sprintf("%sCURRENT_PROJECT_VERSION = %d;", tabsToAdd, 5)
+			newString := fmt.Sprintf("%sCURRENT_PROJECT_VERSION = %d;", tabsToAdd, buildNumber)
 			if lines[lineNumber] != newString {
 				lines[lineNumber] = newString
 				hasChanges = true
@@ -33,10 +66,12 @@ func main() {
 
 	if hasChanges {
 		output := strings.Join(lines, "\n")
-		err = ioutil.WriteFile("../../Password-Generator.xcodeproj/project.pbxproj", []byte(output), 0644)
+		err = ioutil.WriteFile(foundProjectFile, []byte(output), 0644)
 		if err != nil {
 			log.Fatalln(err)
 		}
-		return
 	}
+
+	elapsed := time.Since(start)
+	fmt.Printf("done bumping build %s\n", elapsed)
 }
