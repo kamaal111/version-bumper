@@ -1,10 +1,10 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
-	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -14,12 +14,14 @@ import (
 func main() {
 	start := time.Now()
 
-	buildNumberString := os.Getenv("BUILD_NUMBER")
-	if buildNumberString == "" {
-		log.Fatalln("now build number provided")
+	buildNumberString := initializeFlag("build number", "", "build-number", "bn")
+	flag.Parse()
+
+	if *buildNumberString == "" {
+		log.Fatalln("no build number provided, you can provide a build number by giving -build-number or -bn as a argument with a build number")
 	}
 
-	buildNumber, err := strconv.Atoi(buildNumberString)
+	buildNumber, err := strconv.Atoi(*buildNumberString)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -74,4 +76,11 @@ func main() {
 
 	elapsed := time.Since(start)
 	fmt.Printf("done bumping build %s\n", elapsed)
+}
+
+func initializeFlag(usage string, flagDefault string, longVariable string, shortVariable string) *string {
+	var value string
+	flag.StringVar(&value, longVariable, flagDefault, usage)
+	flag.StringVar(&value, shortVariable, flagDefault, usage)
+	return &value
 }
