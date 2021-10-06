@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -15,13 +16,28 @@ func main() {
 	start := time.Now()
 
 	buildNumberString := initializeFlag("build number", "", "build-number", "bn")
+	infoPlistPath := initializeFlag("info plist path", "", "info-plist", "ip")
 	flag.Parse()
 
 	if *buildNumberString == "" {
 		log.Fatalln("no build number provided, you can provide a build number by giving -build-number or -bn as a argument with a build number")
 	}
+	if *infoPlistPath == "" {
+		log.Fatalln("no info plist path has been provided, you can provide a build number by giving -info-plist or -ip as a argument with a build number")
+	}
 
 	buildNumber, err := strconv.Atoi(*buildNumberString)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	infoPlistFile, err := os.Open(*infoPlistPath)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer infoPlistFile.Close()
+
+	_, err = ioutil.ReadAll(infoPlistFile)
 	if err != nil {
 		log.Fatalln(err)
 	}
