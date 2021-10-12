@@ -10,9 +10,10 @@ import ArgumentParser
 
 @main
 struct VersionBumper: ParsableCommand {
-    @Option(name: .shortAndLong, help: "Build number of app")
+    @Option(name: .shortAndLong, help: "Build number")
     var buildNumber: Int?
-
+    @Option(name: .shortAndLong, help: "version")
+    var version: String?
     @Option(name: .shortAndLong, help: "Info.plist path")
     var infoPlist: String
 
@@ -20,6 +21,7 @@ struct VersionBumper: ParsableCommand {
         case invalidInfoPlistURLError
         case contentNotFound
         case buildTagNotFound
+        case versionTagNotFound
     }
 
     func run() throws {
@@ -28,13 +30,21 @@ struct VersionBumper: ParsableCommand {
             guard let infoPlistDictionary = NSMutableDictionary(contentsOfFile: infoPlistURL.path) else {
                 throw Errors.contentNotFound
             }
+
             if let buildNumber = self.buildNumber {
                 let buildNumberKey = "CFBundleVersion"
                 guard infoPlistDictionary[buildNumberKey] != nil else {
                     throw Errors.buildTagNotFound
                 }
-
                 infoPlistDictionary.setValue("\(buildNumber)", forKey: buildNumberKey)
+            }
+
+            if let version = self.version {
+                let versionKey = "CFBundleShortVersionString"
+                guard infoPlistDictionary[versionKey] != nil else {
+                    throw Errors.versionTagNotFound
+                }
+                infoPlistDictionary.setValue(version, forKey: versionKey)
             }
 
             infoPlistDictionary.write(toFile: infoPlistURL.path, atomically: false)
