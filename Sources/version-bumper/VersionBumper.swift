@@ -11,7 +11,7 @@ import ArgumentParser
 @main
 struct VersionBumper: ParsableCommand {
     @Option(name: .shortAndLong, help: "Build number of app")
-    var buildNumber: Int
+    var buildNumber: Int?
 
     @Option(name: .shortAndLong, help: "Info.plist path")
     var infoPlist: String
@@ -28,12 +28,14 @@ struct VersionBumper: ParsableCommand {
             guard let infoPlistDictionary = NSMutableDictionary(contentsOfFile: infoPlistURL.path) else {
                 throw Errors.contentNotFound
             }
-            let buildNumberKey = "CFBundleVersion"
-            guard infoPlistDictionary[buildNumberKey] != nil else {
-                throw Errors.buildTagNotFound
-            }
+            if let buildNumber = self.buildNumber {
+                let buildNumberKey = "CFBundleVersion"
+                guard infoPlistDictionary[buildNumberKey] != nil else {
+                    throw Errors.buildTagNotFound
+                }
 
-            infoPlistDictionary.setValue("\(buildNumber)", forKey: buildNumberKey)
+                infoPlistDictionary.setValue("\(buildNumber)", forKey: buildNumberKey)
+            }
 
             infoPlistDictionary.write(toFile: infoPlistURL.path, atomically: false)
         }
