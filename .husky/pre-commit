@@ -1,0 +1,8 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+rm -rf bin
+mkdir bin
+cp .build/release/version-bumper bin/version-bumper
+
+git add bin/version-bumper

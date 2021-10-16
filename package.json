@@ -1,0 +1,22 @@
+{
+  "name": "version-bumper",
+  "version": "0.1.0",
+  "description": "A description of this package.",
+  "main": "index.js",
+  "scripts": {
+    "prepare": "husky install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kamaal111/version-bumper.git"
+  },
+  "author": "Kamaal Farah",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kamaal111/version-bumper/issues"
+  },
+  "homepage": "https://github.com/kamaal111/version-bumper#readme",
+  "devDependencies": {
+    "husky": "^7.0.2"
+  }
+}
